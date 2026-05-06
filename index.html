@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تطبيق التوبة</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: #f8f9fa; 
+            display: flex; justify-content: center; align-items: center; 
+            min-height: 100vh; margin: 0; 
+        }
+        .app-card { 
+            background: white; padding: 30px; border-radius: 25px; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1); 
+            text-align: center; width: 90%; max-width: 400px; 
+        }
+        h1 { color: #2c3e50; font-size: 24px; margin-bottom: 10px; }
+        #counter { font-size: 80px; font-weight: bold; color: #27ae60; margin: 10px 0; }
+        .label { color: #7f8c8d; margin-bottom: 25px; }
+        .btn { 
+            border: none; padding: 15px; border-radius: 15px; 
+            font-size: 16px; font-weight: bold; cursor: pointer; 
+            width: 100%; margin-bottom: 12px; transition: 0.3s;
+        }
+        .btn-success { background-color: #27ae60; color: white; }
+        .btn-danger { background-color: #e74c3c; color: white; }
+        .btn-notify { background-color: #f39c12; color: white; }
+        #wisdom-box { 
+            margin-top: 25px; padding: 15px; background: #fff9e6; 
+            border-right: 5px solid #f1c40f; border-radius: 10px;
+            font-size: 15px; color: #444; line-height: 1.6; min-height: 80px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-card">
+    <h1>تطبيق التوبة</h1>
+    <div id="counter">0</div>
+    <div class="label">يوماً من الثبات والتقوى</div>
+
+    <button class="btn btn-success" onclick="markSuccess()">سجل ثباتك اليوم</button>
+    <button class="btn btn-danger" onclick="resetCounter()">حدث ذنب (تصفير العداد)</button>
+    <button class="btn btn-notify" onclick="requestNotificationPermission()">تفعيل التنبيهات 🔔</button>
+
+    <div id="wisdom-box">
+        <p id="wisdom-text">"وَتُوبُوا إِلَى اللَّهِ جَمِيعًا أَيُّهَ الْمُؤْمِنُونَ لَعَلَّكُمْ تُفْلِحُونَ"</p>
+    </div>
+</div>
+
+<script>
+    // 1. قاعدة البيانات (الآيات والروايات)
+    const database = [
+        "قال الله تعالى: {قُلْ يَا عِبَادِيَ الَّذِينَ أَسْرَفُوا عَلَىٰ أَنفُسِهِمْ لَا تَقْنَطُوا مِن رَّحْمَةِ اللَّهِ}",
+        "عن النبي (ص): 'التائب من الذنب كمن لا ذنب له'.",
+        "عن الإمام علي (ع): 'لا شفيع أنجح من التوبة'.",
+        "عن الإمام الصادق (ع): 'إن الله يفرح بتوبة عبده المؤمن إذا تاب'.",
+        "قال تعالى: {إِنَّ اللَّهَ يُحِبُّ التَّوَّابِينَ وَيُحِبُّ الْمُتَطَهِّرِينَ}",
+        "عن الإمام الباقر (ع): 'التائب من الذنب كمن لا ذنب له'."
+    ];
+
+    let days = parseInt(localStorage.getItem('repentanceDays')) || 0;
+    let lastVisitDate = localStorage.getItem('lastVisitDate');
+
+    // دالة فحص التصفير التلقائي عند فتح البرنامج
+    function checkAutoReset() {
+        const today = new Date().toDateString();
+
+        if (lastVisitDate) {
+            const lastDate = new Date(lastVisitDate);
+            const currentDate = new Date(today);
+            
+            // حساب الفرق بالأيام
+            const diffTime = Math.abs(currentDate - lastDate);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            // إذا مر أكثر من يوم (يعني فاتك يوم كامل)
+            if (diffDays > 1) {
+                days = 0;
+                alert("لقد غبت عن البرنامج بالأمس، تم تصفير العداد. ابدأ من جديد!");
+            }
+        }
+        
+        // حفظ تاريخ الفتح الحالي
+        localStorage.setItem('lastVisitDate', today);
+        updateUI();
+    }
+
+    function updateUI() {
+        document.getElementById('counter').innerText = days;
+        localStorage.setItem('repentanceDays', days);
+        const randomIndex = Math.floor(Math.random() * database.length);
+        document.getElementById('wisdom-text').innerText = database[randomIndex];
+    }
+
+    function markSuccess() {
+        days++;
+        updateUI();
+        sendNotification("أحسنتم! يوم جديد في طاعة الله.");
+    }
+
+    function resetCounter() {
+        if(confirm("هل تريد تصفير العداد والبدء من جديد؟")) {
+            days = 0;
+            updateUI();
+            sendNotification("لا تحزن، ابدأ من جديد واستعن بالله.");
+        }
+    }
+
+    // نظام التنبيهات
+    function requestNotificationPermission() {
+        if (!("Notification" in window)) {
+            alert("هذا المتصفح لا يدعم التنبيهات.");
+            return;
+        }
+        Notification.requestPermission().then(permission => {
+            if (permission === "granted") {
+                alert("تم تفعيل التنبيهات بنجاح!");
+                sendNotification("أهلاً بك في تطبيق التوبة.");
+            }
+        });
+    }
+
+    function sendNotification(msg) {
+        if (Notification.permission === "granted") {
+            new Notification("تطبيق التوبة", {
+                body: msg,
+                icon: "https://cdn-icons-png.flaticon.com/512/190/190411.png"
+            });
+        }
+    }
+
+    // بدء الفحص عند التشغيل
+    checkAutoReset();
+
+</script>
+</body>
+</html>
