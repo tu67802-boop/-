@@ -4,137 +4,154 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>تطبيق التوبة</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            background-color: #f8f9fa; 
-            display: flex; justify-content: center; align-items: center; 
-            min-height: 100vh; margin: 0; 
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #000000;
+            color: #ffffff;
+            text-align: center;
+            padding: 20px;
+            margin: 0;
+            user-select: none;
         }
-        .app-card { 
-            background: white; padding: 30px; border-radius: 25px; 
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1); 
-            text-align: center; width: 90%; max-width: 400px; 
+        .header { color: #ffd700; font-size: 1.1rem; margin-top: 10px; }
+        .mahdi { color: #4caf50; font-size: 0.9rem; margin-bottom: 20px; opacity: 0.9; line-height: 1.4; }
+        .main-title { font-size: 1.8rem; margin-bottom: 5px; color: #e0e0e0; }
+        .counter-number {
+            font-size: 7rem;
+            font-weight: bold;
+            color: #2e7d32;
+            line-height: 1;
+            margin: 15px 0;
         }
-        h1 { color: #2c3e50; font-size: 24px; margin-bottom: 10px; }
-        #counter { font-size: 80px; font-weight: bold; color: #27ae60; margin: 10px 0; }
-        .label { color: #7f8c8d; margin-bottom: 25px; }
-        .btn { 
-            border: none; padding: 15px; border-radius: 15px; 
-            font-size: 16px; font-weight: bold; cursor: pointer; 
-            width: 100%; margin-bottom: 12px; transition: 0.3s;
+        .counter-label { color: #888; font-size: 1.1rem; margin-bottom: 25px; }
+        .btn {
+            width: 95%;
+            max-width: 400px;
+            padding: 18px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 15px;
+            margin: 8px 0;
+            cursor: pointer;
+            transition: 0.3s;
         }
         .btn-success { background-color: #27ae60; color: white; }
-        .btn-danger { background-color: #e74c3c; color: white; }
-        .btn-notify { background-color: #f39c12; color: white; }
-        #wisdom-box { 
-            margin-top: 25px; padding: 15px; background: #fff9e6; 
-            border-right: 5px solid #f1c40f; border-radius: 10px;
-            font-size: 15px; color: #444; line-height: 1.6; min-height: 80px;
+        .btn-success:disabled { background-color: #1b5e20; color: #888; cursor: not-allowed; opacity: 0.6; }
+        .btn-danger { background-color: #c62828; color: white; }
+        .btn-warning { background-color: #f39c12; color: white; }
+        .quote-box {
+            background-color: #111;
+            border-right: 5px solid #ffd700;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 25px auto;
+            width: 90%;
+            max-width: 400px;
+            text-align: right;
+            font-size: 1.05rem;
+            line-height: 1.6;
         }
+        #status-msg { color: #ffd700; font-weight: bold; margin-bottom: 10px; display: none; }
     </style>
 </head>
 <body>
 
-<div class="app-card">
-    <h1>تطبيق التوبة</h1>
-    <div id="counter">0</div>
-    <div class="label">يوماً من الثبات والتقوى</div>
+    <div class="header">اللهم صل على محمد وآل محمد</div>
+    <div class="mahdi">المذنبين جرحى في جيش الإمام المهدي عجل الله فرجه</div>
 
-    <button class="btn btn-success" onclick="markSuccess()">سجل ثباتك اليوم</button>
+    <div class="main-title">تطبيق التوبة</div>
+    
+    <div class="counter-number" id="days">0</div>
+    <div class="counter-label">يوماً من الثبات والتقوى</div>
+
+    <div id="status-msg">✨ تم تسجيل ثباتك لهذا اليوم! عد غداً.</div>
+    <button class="btn btn-success" id="recordBtn" onclick="recordSuccess()">سجل ثباتك اليوم</button>
     <button class="btn btn-danger" onclick="resetCounter()">حدث ذنب (تصفير العداد)</button>
-    <button class="btn btn-notify" onclick="requestNotificationPermission()">تفعيل التنبيهات 🔔</button>
+    <button class="btn btn-warning" onclick="requestNotify()">تفعيل التنبيهات 🔔</button>
 
-    <div id="wisdom-box">
-        <p id="wisdom-text">"وَتُوبُوا إِلَى اللَّهِ جَمِيعًا أَيُّهَ الْمُؤْمِنُونَ لَعَلَّكُمْ تُفْلِحُونَ"</p>
-    </div>
-</div>
+    <div class="quote-box" id="quote">جارٍ تحميل الرواية...</div>
+    <div style="font-size: 0.8rem; color: #444;" id="start-date">تاريخ البدء: --</div>
 
-<script>
-    // 1. قاعدة البيانات (الآيات والروايات)
-    const database = [
-        "قال الله تعالى: {قُلْ يَا عِبَادِيَ الَّذِينَ أَسْرَفُوا عَلَىٰ أَنفُسِهِمْ لَا تَقْنَطُوا مِن رَّحْمَةِ اللَّهِ}",
-        "عن النبي (ص): 'التائب من الذنب كمن لا ذنب له'.",
-        "عن الإمام علي (ع): 'لا شفيع أنجح من التوبة'.",
-        "عن الإمام الصادق (ع): 'إن الله يفرح بتوبة عبده المؤمن إذا تاب'.",
-        "قال تعالى: {إِنَّ اللَّهَ يُحِبُّ التَّوَّابِينَ وَيُحِبُّ الْمُتَطَهِّرِينَ}",
-        "عن الإمام الباقر (ع): 'التائب من الذنب كمن لا ذنب له'."
-    ];
+    <script>
+        const quotes = [
+            "عن الإمام الصادق (ع): 'إن الله يفرح بتوبة عبده المؤمن إذا تاب'.",
+            "قال رسول الله (ص): 'التائب من الذنب كمن لا ذنب له'.",
+            "قال الإمام علي (ع): 'لا وجع أوجع للقلوب من الذنوب'.",
+            "آية: (إِنَّ اللَّهَ يُحِبُّ التَّوَّابِينَ وَيُحِبُّ الْمُتَطَهِّرِينَ)",
+            "عن الإمام الباقر (ع): 'التائب من الذنب كمن لا ذنب له والمقيم على الذنب وهو مستغفر منه كالمستهزئ'."
+        ];
 
-    let days = parseInt(localStorage.getItem('repentanceDays')) || 0;
-    let lastVisitDate = localStorage.getItem('lastVisitDate');
-
-    // دالة فحص التصفير التلقائي عند فتح البرنامج
-    function checkAutoReset() {
-        const today = new Date().toDateString();
-
-        if (lastVisitDate) {
-            const lastDate = new Date(lastVisitDate);
-            const currentDate = new Date(today);
+        function init() {
+            let count = localStorage.getItem('count') || 0;
+            let startDate = localStorage.getItem('startDate') || new Date().toLocaleDateString();
+            let lastVisit = localStorage.getItem('lastVisit');
+            let lastRecordDate = localStorage.getItem('lastRecordDate');
             
-            // حساب الفرق بالأيام
-            const diffTime = Math.abs(currentDate - lastDate);
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            const now = new Date();
+            const todayStr = now.toLocaleDateString();
 
-            // إذا مر أكثر من يوم (يعني فاتك يوم كامل)
-            if (diffDays > 1) {
-                days = 0;
-                alert("لقد غبت عن البرنامج بالأمس، تم تصفير العداد. ابدأ من جديد!");
+            // فحص الـ 24 ساعة (التصفير الصارم)
+            if (lastVisit) {
+                const lastVisitTime = new Date(lastVisit);
+                const diffInHours = (now - lastVisitTime) / (1000 * 60 * 60);
+
+                if (diffInHours > 24) { 
+                    count = 0;
+                    startDate = todayStr;
+                    localStorage.setItem('count', 0);
+                    localStorage.setItem('startDate', todayStr);
+                    localStorage.removeItem('lastRecordDate');
+                    alert("نعتذر، مر أكثر من 24 ساعة دون دخولك. تم تصفير العداد!");
+                }
+            }
+
+            // حفظ وقت الدخول الحالي
+            localStorage.setItem('lastVisit', now.toISOString());
+
+            // قفل الزر إذا تم التسجيل اليوم
+            if (lastRecordDate === todayStr) {
+                document.getElementById('recordBtn').disabled = true;
+                document.getElementById('recordBtn').innerText = "تم تسجيل ثبات اليوم ✅";
+                document.getElementById('status-msg').style.display = "block";
+            }
+
+            document.getElementById('days').innerText = count;
+            document.getElementById('start-date').innerText = "تاريخ البدء: " + startDate;
+            document.getElementById('quote').innerText = quotes[Math.floor(Math.random() * quotes.length)];
+        }
+
+        function recordSuccess() {
+            const todayStr = new Date().toLocaleDateString();
+            let count = parseInt(localStorage.getItem('count')) || 0;
+            
+            count++;
+            localStorage.setItem('count', count);
+            localStorage.setItem('lastRecordDate', todayStr);
+            localStorage.setItem('lastVisit', new Date().toISOString()); // تحديث وقت الزيارة عند الضغط
+            
+            alert("أحسنتم! تم تسجيل يوم جديد في ميزان ثباتكم.");
+            location.reload();
+        }
+
+        function resetCounter() {
+            if (confirm("هل تريد تصفير العداد والبدء من جديد؟")) {
+                localStorage.setItem('count', 0);
+                localStorage.setItem('startDate', new Date().toLocaleDateString());
+                localStorage.removeItem('lastRecordDate');
+                location.reload();
             }
         }
-        
-        // حفظ تاريخ الفتح الحالي
-        localStorage.setItem('lastVisitDate', today);
-        updateUI();
-    }
 
-    function updateUI() {
-        document.getElementById('counter').innerText = days;
-        localStorage.setItem('repentanceDays', days);
-        const randomIndex = Math.floor(Math.random() * database.length);
-        document.getElementById('wisdom-text').innerText = database[randomIndex];
-    }
-
-    function markSuccess() {
-        days++;
-        updateUI();
-        sendNotification("أحسنتم! يوم جديد في طاعة الله.");
-    }
-
-    function resetCounter() {
-        if(confirm("هل تريد تصفير العداد والبدء من جديد؟")) {
-            days = 0;
-            updateUI();
-            sendNotification("لا تحزن، ابدأ من جديد واستعن بالله.");
-        }
-    }
-
-    // نظام التنبيهات
-    function requestNotificationPermission() {
-        if (!("Notification" in window)) {
-            alert("هذا المتصفح لا يدعم التنبيهات.");
-            return;
-        }
-        Notification.requestPermission().then(permission => {
-            if (permission === "granted") {
-                alert("تم تفعيل التنبيهات بنجاح!");
-                sendNotification("أهلاً بك في تطبيق التوبة.");
-            }
-        });
-    }
-
-    function sendNotification(msg) {
-        if (Notification.permission === "granted") {
-            new Notification("تطبيق التوبة", {
-                body: msg,
-                icon: "https://cdn-icons-png.flaticon.com/512/190/190411.png"
+        function requestNotify() {
+            Notification.requestPermission().then(p => {
+                if (p === "granted") alert("التنبيهات مفعلة.");
             });
         }
-    }
 
-    // بدء الفحص عند التشغيل
-    checkAutoReset();
-
-</script>
+        window.onload = init;
+    </script>
 </body>
 </html>
