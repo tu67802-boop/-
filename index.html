@@ -6,60 +6,90 @@
     <title>العودة إلى الله</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Cairo', sans-serif; background-color: #000; color: #fff; text-align: center; padding: 20px; margin: 0; }
+        body { font-family: 'Cairo', sans-serif; background-color: #000; color: #fff; text-align: center; padding: 20px; margin: 0; user-select: none; }
         .top-dhikr { color: #ffd700; font-size: 1.1rem; margin-bottom: 5px; font-weight: bold; }
         .middle-dhikr { color: #e0e0e0; font-size: 0.9rem; margin-bottom: 5px; }
         .mahdi-text { color: #4caf50; font-size: 0.9rem; margin-bottom: 20px; }
         
         .total-box { background: #1a1a1a; padding: 15px; border-radius: 15px; margin: 10px auto; width: 85%; border: 1px solid #444; position: relative; }
-        .edit-icon { position: absolute; top: 10px; left: 10px; cursor: pointer; color: #ffd700; font-size: 0.8rem; border: 1px solid #ffd700; padding: 2px 8px; border-radius: 5px; }
+        .edit-icon { position: absolute; top: 10px; left: 10px; cursor: pointer; color: #ffd700; font-size: 0.7rem; border: 1px solid #ffd700; padding: 2px 6px; border-radius: 5px; }
         
-        .counter-number { font-size: 7rem; font-weight: bold; color: #2e7d32; margin: 10px 0; }
-        .btn { width: 95%; max-width: 400px; padding: 15px; font-size: 1.1rem; font-weight: bold; border: none; border-radius: 15px; margin: 8px 0; cursor: pointer; }
+        .counter-number { font-size: 7rem; font-weight: bold; color: #2e7d32; line-height: 1; margin: 10px 0; }
+        
+        .btn { width: 95%; max-width: 400px; padding: 18px; font-size: 1.2rem; font-weight: bold; border: none; border-radius: 15px; margin: 8px 0; cursor: pointer; }
         .btn-success { background-color: #27ae60; color: white; }
+        .btn-success:disabled { background-color: #1b5e20; color: #888; cursor: not-allowed; }
         .btn-danger { background-color: #c62828; color: white; }
+        
+        .quote-box { background-color: #111; border-right: 5px solid #ffd700; padding: 20px; border-radius: 10px; margin: 25px auto; width: 90%; text-align: right; line-height: 1.6; min-height: 60px; }
     </style>
 </head>
 <body>
 
     <div class="top-dhikr">بسم الله الرحمن الرحيم</div>
-    <div class="middle-dhikr">استغفر الله واتوب اليه ولا حول ولا قوة الا بالله</div>
+    <div class="middle-dhikr">استغفر الله واتوب اليه ولا حول ولا قوة الا بالله العلي العظيم</div>
     <div class="top-dhikr">اللهم صل على محمد وآل محمد</div>
     <div class="mahdi-text">المذنبين جرحى في جيش صاحب الزمان</div>
 
     <div class="total-box">
         <div style="color: #aaa; font-size: 0.8rem;">إجمالي أيام العودة (السجل التاريخي)</div>
-        <div class="total-number" id="totalDays" style="font-size: 1.5rem; font-weight: bold; color: #ffd700;">0</div>
-        <!-- زر التعديل -->
+        <div id="totalDays" style="font-size: 1.5rem; font-weight: bold; color: #ffd700;">0</div>
         <span class="edit-icon" onclick="editTotalDays()">تعديل ✎</span>
     </div>
 
     <div class="counter-number" id="currentDays">0</div>
-    <div style="color: #888; margin-bottom: 20px;">يوماً من الثبات الحالي</div>
+    <div style="color: #888;">يوماً من الثبات الحالي</div>
 
     <button class="btn btn-success" id="recordBtn" onclick="recordSuccess()">سجل ثباتك اليوم</button>
     <button class="btn btn-danger" onclick="resetCounter()">حدث ذنب (تصفير الحالي)</button>
 
+    <div class="quote-box" id="quote">جارٍ تحميل الحكمة...</div>
+
     <script>
+        const quotes = [
+            "آية: (قُلْ يَا عِبَادِيَ الَّذِينَ أَسْرَفُوا عَلَى أَنْفُسِهِمْ لَا تَقْنَطُوا مِنْ رَحْمَةِ اللَّهِ)",
+            "رواية: عن النبي (ص): 'التائب من الذنب كمن لا ذنب له'.",
+            "رواية: قال الإمام الصادق (ع): 'إن الله يفرح بتوبة عبده المؤمن إذا تاب'.",
+            "آية: (إِنَّ اللَّهَ يُحِبُّ التَّوَّابِينَ وَيُحِبُّ الْمُتَطَهِّرِينَ)",
+            "رواية: قال الإمام علي (ع): 'تعطروا بالاستغفار، لا تفضحنكم روائح الذنوب'.",
+            "رواية: عن الإمام الباقر (ع): 'التائب من الذنب كالمقيم عليه وهو مستغفر منه كالمستهزئ'.",
+            "آية: (وَهُوَ الَّذِي يَقْبَلُ التَّوْبَةَ عَنْ عِبَادِهِ وَيَعْفُو عَنِ السَّيِّئَاتِ)"
+        ];
+
         function init() {
             let current = localStorage.getItem('currentCount') || 0;
             let total = localStorage.getItem('totalCount') || 0;
+            let lastVisit = localStorage.getItem('lastVisit');
+            let lastRecordDate = localStorage.getItem('lastRecordDate');
             
-            document.getElementById('currentDays').innerText = current;
-            document.getElementById('totalDays').innerText = total;
+            const now = new Date();
+            const todayStr = now.toLocaleDateString();
 
-            // قفل الزر اليومي
-            if (localStorage.getItem('lastRecordDate') === new Date().toLocaleDateString()) {
+            if (lastVisit) {
+                const diffHours = (now - new Date(lastVisit)) / (1000 * 60 * 60);
+                if (diffHours > 24) {
+                    current = 0;
+                    localStorage.setItem('currentCount', 0);
+                    alert("نعتذر، غبت لأكثر من يوم فتم تصفير العداد الحالي.");
+                }
+            }
+
+            localStorage.setItem('lastVisit', now.toISOString());
+
+            if (lastRecordDate === todayStr) {
                 document.getElementById('recordBtn').disabled = true;
                 document.getElementById('recordBtn').innerText = "تم تسجيل ثبات اليوم ✅";
             }
+
+            document.getElementById('currentDays').innerText = current;
+            document.getElementById('totalDays').innerText = total;
+            document.getElementById('quote').innerText = quotes[Math.floor(Math.random() * quotes.length)];
         }
 
-        // دالة التعديل اليدوي
         function editTotalDays() {
-            let newTotal = prompt("أدخل عدد أيام العودة الكلي الجديد:", localStorage.getItem('totalCount') || 0);
-            if (newTotal !== null) {
-                localStorage.setItem('totalCount', newTotal);
+            let newTotal = prompt("أدخل الرقم الجديد لإجمالي أيام العودة:", localStorage.getItem('totalCount') || 0);
+            if (newTotal !== null && !isNaN(newTotal)) {
+                localStorage.setItem('totalCount', parseInt(newTotal));
                 location.reload();
             }
         }
@@ -77,6 +107,7 @@
         function resetCounter() {
             if (confirm("هل تريد تصفير العداد الحالي؟")) {
                 localStorage.setItem('currentCount', 0);
+                localStorage.removeItem('lastRecordDate');
                 location.reload();
             }
         }
