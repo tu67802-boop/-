@@ -7,115 +7,76 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Cairo', sans-serif; background-color: #000; color: #fff; text-align: center; padding: 20px; margin: 0; }
+        .top-dhikr { color: #ffd700; font-size: 1.1rem; margin-bottom: 5px; font-weight: bold; }
+        .middle-dhikr { color: #e0e0e0; font-size: 0.9rem; margin-bottom: 5px; }
+        .mahdi-text { color: #4caf50; font-size: 0.9rem; margin-bottom: 20px; }
         
-        /* القسم العلوي للأذكار */
-        .top-dhikr { color: #ffd700; font-size: 1.2rem; margin-bottom: 5px; font-weight: bold; }
-        .middle-dhikr { color: #e0e0e0; font-size: 1rem; margin-bottom: 5px; line-height: 1.6; }
-        .mahdi-text { color: #4caf50; font-size: 0.95rem; margin-bottom: 20px; opacity: 0.9; }
+        .total-box { background: #1a1a1a; padding: 15px; border-radius: 15px; margin: 10px auto; width: 85%; border: 1px solid #444; position: relative; }
+        .edit-icon { position: absolute; top: 10px; left: 10px; cursor: pointer; color: #ffd700; font-size: 0.8rem; border: 1px solid #ffd700; padding: 2px 8px; border-radius: 5px; }
         
-        .main-title { font-size: 1.8rem; margin: 10px 0; color: #fff; border-bottom: 1px solid #333; padding-bottom: 10px; }
-
-        /* المربع الإحصائي الكلي */
-        .total-box { background: #1a1a1a; padding: 15px; border-radius: 15px; margin: 10px auto; width: 85%; border: 1px solid #444; }
-        .total-title { color: #aaa; font-size: 0.85rem; }
-        .total-number { color: #ffd700; font-size: 1.6rem; font-weight: bold; }
-
-        .counter-number { font-size: 7.5rem; font-weight: bold; color: #2e7d32; line-height: 1; margin: 15px 0; }
-        .counter-label { color: #888; font-size: 1.1rem; margin-bottom: 25px; }
-        
-        .btn { width: 95%; max-width: 400px; padding: 18px; font-size: 1.2rem; font-weight: bold; border: none; border-radius: 15px; margin: 8px 0; cursor: pointer; transition: 0.3s; }
+        .counter-number { font-size: 7rem; font-weight: bold; color: #2e7d32; margin: 10px 0; }
+        .btn { width: 95%; max-width: 400px; padding: 15px; font-size: 1.1rem; font-weight: bold; border: none; border-radius: 15px; margin: 8px 0; cursor: pointer; }
         .btn-success { background-color: #27ae60; color: white; }
-        .btn-success:disabled { background-color: #1b5e20; color: #888; cursor: not-allowed; }
         .btn-danger { background-color: #c62828; color: white; }
-        
-        .quote-box { background-color: #111; border-right: 5px solid #ffd700; padding: 20px; border-radius: 10px; margin: 25px auto; width: 90%; text-align: right; line-height: 1.6; }
     </style>
 </head>
 <body>
 
-    <!-- الأذكار والعبارات المطلوبة -->
     <div class="top-dhikr">بسم الله الرحمن الرحيم</div>
-    <div class="middle-dhikr">استغفر الله واتوب اليه ولا حول ولا قوة الا بالله العلي العظيم</div>
+    <div class="middle-dhikr">استغفر الله واتوب اليه ولا حول ولا قوة الا بالله</div>
     <div class="top-dhikr">اللهم صل على محمد وآل محمد</div>
     <div class="mahdi-text">المذنبين جرحى في جيش صاحب الزمان</div>
 
-    <div class="main-title">العودة إلى الله</div>
-    
-    <!-- سجل التوبة الكلي (لا يصفر) -->
     <div class="total-box">
-        <div class="total-title">إجمالي أيام العودة (السجل التاريخي)</div>
-        <div class="total-number" id="totalDays">0</div>
+        <div style="color: #aaa; font-size: 0.8rem;">إجمالي أيام العودة (السجل التاريخي)</div>
+        <div class="total-number" id="totalDays" style="font-size: 1.5rem; font-weight: bold; color: #ffd700;">0</div>
+        <!-- زر التعديل -->
+        <span class="edit-icon" onclick="editTotalDays()">تعديل ✎</span>
     </div>
 
     <div class="counter-number" id="currentDays">0</div>
-    <div class="counter-label">يوماً من الثبات الحالي</div>
+    <div style="color: #888; margin-bottom: 20px;">يوماً من الثبات الحالي</div>
 
     <button class="btn btn-success" id="recordBtn" onclick="recordSuccess()">سجل ثباتك اليوم</button>
     <button class="btn btn-danger" onclick="resetCounter()">حدث ذنب (تصفير الحالي)</button>
 
-    <div class="quote-box" id="quote">جارٍ التحميل...</div>
-
     <script>
-        const quotes = [
-            "عن الإمام الصادق (ع): 'إن الله يفرح بتوبة عبده المؤمن إذا تاب'.",
-            "قال رسول الله (ص): 'التائب من الذنب كمن لا ذنب له'.",
-            "قال الإمام علي (ع): 'لا وجع أوجع للقلوب من الذنوب'.",
-            "آية: (إِنَّ اللَّهَ يُحِبُّ التَّوَّابِينَ وَيُحِبُّ الْمُتَطَهِّرِينَ)",
-            "عن الإمام الباقر (ع): 'ما من عبد إلا وفي قلبه نكتة بيضاء، فإذا أذنب خرجت نكتة سوداء، فإذا تاب ذهب ذلك السواد'."
-        ];
-
         function init() {
             let current = localStorage.getItem('currentCount') || 0;
             let total = localStorage.getItem('totalCount') || 0;
-            let lastVisit = localStorage.getItem('lastVisit');
-            let lastRecordDate = localStorage.getItem('lastRecordDate');
             
-            const now = new Date();
-            const todayStr = now.toLocaleDateString();
+            document.getElementById('currentDays').innerText = current;
+            document.getElementById('totalDays').innerText = total;
 
-            // فحص الـ 24 ساعة للعداد الحالي (التصفير الصارم)
-            if (lastVisit) {
-                const diffHours = (now - new Date(lastVisit)) / (1000 * 60 * 60);
-                if (diffHours > 24) {
-                    current = 0; // يصفر العداد الحالي فقط
-                    localStorage.setItem('currentCount', 0);
-                    alert("مر أكثر من 24 ساعة دون دخولك؛ عُد للثبات من جديد!");
-                }
-            }
-
-            localStorage.setItem('lastVisit', now.toISOString());
-
-            // قفل الزر لمرة واحدة في اليوم
-            if (lastRecordDate === todayStr) {
+            // قفل الزر اليومي
+            if (localStorage.getItem('lastRecordDate') === new Date().toLocaleDateString()) {
                 document.getElementById('recordBtn').disabled = true;
                 document.getElementById('recordBtn').innerText = "تم تسجيل ثبات اليوم ✅";
             }
+        }
 
-            document.getElementById('currentDays').innerText = current;
-            document.getElementById('totalDays').innerText = total;
-            document.getElementById('quote').innerText = quotes[Math.floor(Math.random() * quotes.length)];
+        // دالة التعديل اليدوي
+        function editTotalDays() {
+            let newTotal = prompt("أدخل عدد أيام العودة الكلي الجديد:", localStorage.getItem('totalCount') || 0);
+            if (newTotal !== null) {
+                localStorage.setItem('totalCount', newTotal);
+                location.reload();
+            }
         }
 
         function recordSuccess() {
-            const todayStr = new Date().toLocaleDateString();
             let current = parseInt(localStorage.getItem('currentCount')) || 0;
             let total = parseInt(localStorage.getItem('totalCount')) || 0;
-            
-            current++;
-            total++; 
-            
+            current++; total++;
             localStorage.setItem('currentCount', current);
             localStorage.setItem('totalCount', total);
-            localStorage.setItem('lastRecordDate', todayStr);
-            localStorage.setItem('lastVisit', new Date().toISOString());
-            
+            localStorage.setItem('lastRecordDate', new Date().toLocaleDateString());
             location.reload();
         }
 
         function resetCounter() {
-            if (confirm("هل سقطت في الذنب؟ سيتم تصفير العداد الحالي فقط مع بقاء سجلك الكلي محفوظاً.")) {
+            if (confirm("هل تريد تصفير العداد الحالي؟")) {
                 localStorage.setItem('currentCount', 0);
-                localStorage.removeItem('lastRecordDate');
                 location.reload();
             }
         }
