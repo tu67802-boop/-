@@ -7,21 +7,33 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Cairo', sans-serif; background-color: #000; color: #fff; text-align: center; padding: 20px; margin: 0; user-select: none; }
-        .top-dhikr { color: #ffd700; font-size: 1.1rem; margin-bottom: 5px; font-weight: bold; }
-        .middle-dhikr { color: #e0e0e0; font-size: 0.9rem; margin-bottom: 5px; }
-        .mahdi-text { color: #4caf50; font-size: 0.9rem; margin-bottom: 20px; }
         
+        /* القسم العلوي للأذكار */
+        .top-dhikr { color: #ffd700; font-size: 1.1rem; margin-bottom: 5px; font-weight: bold; }
+        .middle-dhikr { color: #e0e0e0; font-size: 0.9rem; margin-bottom: 5px; line-height: 1.5; }
+        .mahdi-text { color: #4caf50; font-size: 0.9rem; margin-bottom: 15px; opacity: 0.9; }
+        
+        /* اسم التطبيق الجديد */
+        .main-app-title { font-size: 2rem; color: #ffffff; margin: 20px 0; font-weight: bold; border-bottom: 2px solid #333; padding-bottom: 10px; }
+
+        /* المربع الإحصائي الكلي */
         .total-box { background: #1a1a1a; padding: 15px; border-radius: 15px; margin: 10px auto; width: 85%; border: 1px solid #444; position: relative; }
         .edit-icon { position: absolute; top: 10px; left: 10px; cursor: pointer; color: #ffd700; font-size: 0.7rem; border: 1px solid #ffd700; padding: 2px 6px; border-radius: 5px; }
+        .total-title { color: #aaa; font-size: 0.8rem; }
+        .total-number { color: #ffd700; font-size: 1.6rem; font-weight: bold; }
+
+        /* العداد الحالي */
+        .counter-number { font-size: 7.5rem; font-weight: bold; color: #2e7d32; line-height: 1; margin: 15px 0; }
+        .counter-label { color: #888; font-size: 1.1rem; margin-bottom: 25px; }
         
-        .counter-number { font-size: 7rem; font-weight: bold; color: #2e7d32; line-height: 1; margin: 10px 0; }
-        
-        .btn { width: 95%; max-width: 400px; padding: 18px; font-size: 1.2rem; font-weight: bold; border: none; border-radius: 15px; margin: 8px 0; cursor: pointer; }
+        /* الأزرار */
+        .btn { width: 95%; max-width: 400px; padding: 18px; font-size: 1.2rem; font-weight: bold; border: none; border-radius: 15px; margin: 8px 0; cursor: pointer; transition: 0.3s; }
         .btn-success { background-color: #27ae60; color: white; }
         .btn-success:disabled { background-color: #1b5e20; color: #888; cursor: not-allowed; }
         .btn-danger { background-color: #c62828; color: white; }
         
-        .quote-box { background-color: #111; border-right: 5px solid #ffd700; padding: 20px; border-radius: 10px; margin: 25px auto; width: 90%; text-align: right; line-height: 1.6; min-height: 60px; }
+        /* صندوق الآيات والروايات */
+        .quote-box { background-color: #111; border-right: 5px solid #ffd700; padding: 20px; border-radius: 10px; margin: 25px auto; width: 90%; text-align: right; line-height: 1.6; min-height: 80px; font-size: 1rem; }
     </style>
 </head>
 <body>
@@ -31,14 +43,17 @@
     <div class="top-dhikr">اللهم صل على محمد وآل محمد</div>
     <div class="mahdi-text">المذنبين جرحى في جيش صاحب الزمان</div>
 
+    <!-- تم إعادة الاسم هنا وبشكل بارز -->
+    <div class="main-app-title">العودة إلى الله</div>
+    
     <div class="total-box">
-        <div style="color: #aaa; font-size: 0.8rem;">إجمالي أيام العودة (السجل التاريخي)</div>
-        <div id="totalDays" style="font-size: 1.5rem; font-weight: bold; color: #ffd700;">0</div>
+        <div class="total-title">إجمالي أيام العودة (السجل التاريخي)</div>
+        <div id="totalDays" class="total-number">0</div>
         <span class="edit-icon" onclick="editTotalDays()">تعديل ✎</span>
     </div>
 
     <div class="counter-number" id="currentDays">0</div>
-    <div style="color: #888;">يوماً من الثبات الحالي</div>
+    <div class="counter-label">يوماً من الثبات الحالي</div>
 
     <button class="btn btn-success" id="recordBtn" onclick="recordSuccess()">سجل ثباتك اليوم</button>
     <button class="btn btn-danger" onclick="resetCounter()">حدث ذنب (تصفير الحالي)</button>
@@ -70,7 +85,7 @@
                 if (diffHours > 24) {
                     current = 0;
                     localStorage.setItem('currentCount', 0);
-                    alert("نعتذر، غبت لأكثر من يوم فتم تصفير العداد الحالي.");
+                    alert("نعتذر، غبت لأكثر من 24 ساعة؛ تم تصفير العداد الحالي للثبات.");
                 }
             }
 
@@ -105,7 +120,7 @@
         }
 
         function resetCounter() {
-            if (confirm("هل تريد تصفير العداد الحالي؟")) {
+            if (confirm("هل تريد تصفير العداد الحالي؟ (سيبقى سجلك الكلي محفوظاً)")) {
                 localStorage.setItem('currentCount', 0);
                 localStorage.removeItem('lastRecordDate');
                 location.reload();
